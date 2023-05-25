@@ -7,12 +7,22 @@ import { StatusBar } from 'expo-status-bar'
 import { ImageBackground, Text, TouchableOpacity, View } from 'react-native'
 
 import { BaiJamjuree_700Bold } from '@expo-google-fonts/bai-jamjuree'
+import { makeRedirectUri, useAuthRequest } from 'expo-auth-session'
 import { styled } from 'nativewind'
+import { useEffect } from 'react'
 import bgBlur from './src/assets/bg-blur.png'
 import NLWLogo from './src/assets/nlw-spacetime-logo.svg'
 import Stripes from './src/assets/stripes.svg'
 
 const StyledStripes = styled(Stripes)
+
+// Endpoint
+const discovery = {
+  authorizationEndpoint: 'https://github.com/login/oauth/authorize',
+  tokenEndpoint: 'https://github.com/login/oauth/access_token',
+  revocationEndpoint:
+    'https://github.com/settings/connections/applications/3687372f765c9e0741d9',
+}
 
 export default function App() {
   const [hasLoadedFonts] = useFonts({
@@ -20,6 +30,23 @@ export default function App() {
     Roboto_700Bold,
     BaiJamjuree_700Bold,
   })
+
+  const [request, response, signInWithGithub] = useAuthRequest(
+    {
+      clientId: '3687372f765c9e0741d9',
+      scopes: ['identity'],
+      redirectUri: makeRedirectUri({
+        scheme: 'nlwspacetime',
+      }),
+    },
+    discovery,
+  )
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { code } = response.params
+    }
+  }, [response])
 
   if (!hasLoadedFonts) {
     return null
@@ -47,6 +74,7 @@ export default function App() {
         <TouchableOpacity
           activeOpacity={0.7}
           className="rounded-full bg-green-500  px-5 py-3"
+          onPress={() => signInWithGithub()}
         >
           <Text className="font-alt text-sm uppercase text-black">
             COMEÇAR A CADASTRAR
